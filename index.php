@@ -27,6 +27,7 @@
     <script src="./js/popper.min.js"></script>
     <script src="./js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="./DataTables/datatables.min.css">
+    <link rel="stylesheet" href="./css/navbar.css">
     <script src="./DataTables/datatables.min.js"></script>
     <script src="./fontawesome/js/all.min.js"></script>
     <script src="./js/script.js"></script>

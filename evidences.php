@@ -61,10 +61,10 @@
                     
                                     <td class="py-1 px-2">
                                         <?php
-                                        $fileName = $row['imagePath']; // Change this to the appropriate column name
-                                        $caseid = $row['caseID']; // Change this to the appropriate column name
-                                        $evidenceName = $row['evidenceName']; // Add this line to get the evidence name
-                                        $imagePath = $row['imagePath']; // Add this line to get the evidence name
+                                        $fileName = $row['imagePath'];
+                                        $caseid = $row['caseID'];
+                                        $evidenceName = $row['evidenceName'];
+                                        $imagePath = $row['imagePath'];
                                         $downloadLink = 'download.php?file=' . urlencode($fileName) . '&caseid=' . urlencode($caseid);
                                         ?>
                                         
@@ -134,7 +134,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-    <script>
+    <!-- <script>
         function downloadAndLog(downloadLink, evidenceName, caseid, imagePath) {
             if (confirm('Are you sure you want to download this evidence "' + evidenceName + '"?')) {
                 // confirmDownload(downloadLink, evidenceName, caseid);
@@ -162,128 +162,108 @@
                 });
             }
         }
-    </script>
+    </script> -->
     <script>
-        function confirmDownload(downloadLink, evidenceName, caseid) {
-            if (confirm('Are you sure you want to download this evidence "' + evidenceName + '"?')) {
-                window.location.href = downloadLink + '&caseid=' + caseid;
-                logDownloadAction(evidenceName);
-            }
-        }
-
-        const nonVerifiedButtons = document.querySelectorAll('img[name="nonverified"]');
-        nonVerifiedButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                $('#verificationModal').modal('show');
-            });
-        });
-
-        function showVerificationModal(evidenceNumber) {
-            $('#verificationModal').modal('show');
-        }
-
-        // function updateVerification() {
-        //     const verificationForm = document.getElementById('verificationForm');
-        //     const selectedRadio = verificationForm.querySelector('input[name="verification"]:checked');
-
-        //     if (!selectedRadio) {
-        //         alert('Please select a verification status.');
-        //         return;
-        //     }
-
-        //     const verificationStatus = selectedRadio.value;
-        //     console.log('Verification status:', verificationStatus);
-
-        //     // Perform the update in the database
-        //     // You can send an AJAX request to update the database.
-
-        //     // Close the modal
-        //     $('#verificationModal').modal('hide');
-        // }
-
-        // Add event listener to the search input
-        const searchInput = document.getElementById('searchInput');
-        searchInput.addEventListener('input', handleSearch);
-
-        function handleSearch() {
-            const searchText = searchInput.value.toLowerCase();
-            const rows = document.querySelectorAll('tbody tr');
-
-            rows.forEach((row) => {
-                const cells = row.getElementsByTagName('td');
-                let match = false;
-                for (let i = 0; i < cells.length; i++) {
-                    if (cells[i].textContent.toLowerCase().includes(searchText)) {
-                        match = true;
-                        break;
+    function downloadAndLog(downloadLink, evidenceName, caseid, imagePath) {
+        if (confirm('Are you sure you want to download this evidence "' + evidenceName + '"?')) {
+            $.ajax({
+                type: 'POST',
+                url: 'downloadAndLog.php',
+                data: {
+                    downloadLink: downloadLink,
+                    evidenceName: evidenceName,
+                    caseid: caseid,
+                    imagePath: imagePath
+                },
+                success: function(response) {
+                    if (response === 'success') {
+                        window.location.href = downloadLink + '&caseid=' + caseid;
+                        alert('Download and log operation completed successfully.');
+                    } else {
+                        alert('Download and log operation failed: ' + response);
                     }
-                }
-                if (match) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
+                },
+                error: function(xhr, status, error) {
+                    alert('Error: ' + error);
                 }
             });
         }
-
-        function showVerificationModal(evidenceNumber, verificationStatus) {
-            // Set the hidden input field with the evidence number
-            document.getElementById('evidenceNumberInput').value = evidenceNumber;
-
-            // Select the appropriate radio button based on the verification status
-            if (verificationStatus === 0) {
-                document.getElementById('notVerifyRadio').checked = true;
-            } else {
-                document.getElementById('verifyRadio').checked = true;
-            }
-
-            console.log(verificationStatus)
-
-            $('#verificationModal').modal('show');
-        }
-
-        function updateVerification() {
-    const verificationForm = document.getElementById('verificationForm');
-    const selectedRadio = verificationForm.querySelector('input[name="verification"]:checked');
-
-    if (!selectedRadio) {
-        alert('Please select a verification status.');
-        return;
     }
 
-    const verificationStatus = selectedRadio.value;
-    const evidenceNumber = document.getElementById('evidenceNumberInput').value;
-
-    // Perform the update in the database via AJAX
-    $.ajax({
-        type: 'POST',
-        url: 'updateVerification.php', // Replace with the actual URL of your PHP script
-        data: {
-            evidenceNumber: evidenceNumber,
-            verificationStatus: verificationStatus
-        },
-        success: function(response) {
-            if (response === 'success') {
-                // Database update successful
-                // Optionally, you can update the displayed verification status without a page refresh
-                const verificationStatusElement = document.querySelector('td[data-evidence-number="' + evidenceNumber + '"]');
-                if (verificationStatusElement) {
-                    verificationStatusElement.textContent = verificationStatus;
-                }
-
-                alert('Verification status updated successfully.');
-            } else {
-                alert('Verification status update failed: ' + response);
-            }
-        },
-        error: function(xhr, status, error) {
-            alert('Error: ' + error);
+    function showVerificationModal(evidenceNumber, verificationStatus) {
+        document.getElementById('evidenceNumberInput').value = evidenceNumber;
+        if (verificationStatus === 0) {
+            document.getElementById('notVerifyRadio').checked = true;
+        } else {
+            document.getElementById('verifyRadio').checked = true;
         }
-    });
+        $('#verificationModal').modal('show');
+    }
 
-    // Close the modal
-    $('#verificationModal').modal('hide');
-}
+    function updateVerification() {
+        const verificationForm = document.getElementById('verificationForm');
+        const verifyRadio = verificationForm.querySelector('input[name="verification"][value="verified"]');
+        const notVerifyRadio = verificationForm.querySelector('input[name="verification"][value="not-verified"]');
 
-    </script>
+        if (verifyRadio.checked) {
+            var verificationStatus = 1; // Set verificationStatus to 1 when the "Verify" radio button is selected
+        } else if (notVerifyRadio.checked) {
+            var verificationStatus = 0; // Set verificationStatus to 0 when the "Not Verify" radio button is selected
+        } else {
+            alert('Please select a verification status.');
+            return;
+        }
+
+        const evidenceNumber = document.getElementById('evidenceNumberInput').value;
+
+        $.ajax({
+            type: 'POST',
+            url: 'updateVerification.php',
+            data: {
+                evidenceNumber: evidenceNumber,
+                verificationStatus: verificationStatus
+            },
+            success: function(response) {
+                if (response === 'success') {
+                    // Optionally, you can update the displayed verification status without a page refresh
+                    const verificationStatusElement = document.querySelector('td[data-evidence-number="' + evidenceNumber + '"]');
+                    if (verificationStatusElement) {
+                        verificationStatusElement.textContent = (verificationStatus === 1) ? 'verified' : 'not-verified';
+                    }
+
+                    alert('Verification status updated successfully.');
+                } else {
+                    alert('Verification status update failed: ' + response);
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('Error: ' + error);
+            }
+        });
+
+        $('#verificationModal').modal('hide');
+    }
+
+    function updateEvidenceLog(evidenceNumber, verificationStatus) {
+        $.ajax({
+            type: 'POST',
+            url: 'updateEvidenceLog.php', // Create a PHP file for this operation
+            data: {
+                evidenceNumber: evidenceNumber,
+                verificationStatus: verificationStatus
+            },
+            success: function(response) {
+                if (response === 'success') {
+                    console.log('Evidence log updated successfully.');
+                } else {
+                    console.error('Evidence log update failed: ' + response);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error: ' + error);
+            }
+        });
+    }
+
+</script>
 </body>

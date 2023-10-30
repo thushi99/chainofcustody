@@ -1,18 +1,33 @@
 <?php
-// Your database connection code here
+// Database configuration
+$server = "localhost";
+$username = "root";
+$password = "";
+$database = "audit_trailing";
+
+// Create a connection
+$conn = new mysqli($server, $username, $password, $database);
+
+// Check the connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 
 if (isset($_POST['evidenceNumber'], $_POST['verificationStatus'])) {
     $evidenceNumber = $_POST['evidenceNumber'];
     $verificationStatus = $_POST['verificationStatus'];
 
-    // Perform the database update here, e.g., using SQL
-    $query = "UPDATE evidence SET verification = '$verificationStatus' WHERE evidenceNumber = '$evidenceNumber'";
+    // Prepare and execute the SQL statement with a prepared statement
+    $stmt = $conn->prepare("UPDATE evidence SET verification = ? WHERE evidenceNumber = ?");
+    $stmt->bind_param("ii", $verificationStatus, $evidenceNumber);
 
-    if ($conn->query($query) === TRUE) {
+    if ($stmt->execute()) {
         echo 'success';
     } else {
-        echo 'Database update failed: ' . $conn->error;
+        echo 'Database update failed: ' . $stmt->error;
     }
+
+    $stmt->close();
 } else {
     echo 'Invalid POST data.';
 }
